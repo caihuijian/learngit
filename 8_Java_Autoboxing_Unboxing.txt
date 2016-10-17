@@ -1,0 +1,142 @@
+Java 自动装箱和自动拆箱
+
+参考自
+http://www.cnblogs.com/danne823/archive/2011/04/22/2025332.html
+http://www.cnblogs.com/dolphin0520/p/3780005.html
+（部分修改）
+
+
+A 什么是自动装箱拆箱
+基本数据类型的自动装箱(autoboxing)、拆箱(unboxing)是自J2SE 5.0开始提供的功能。 
+一般我们要创建一个类的对象实例的时候，我们会这样：
+ Class a = new Class(parameter);
+当我们创建一个Integer对象时，却可以这样：
+ Integer i = 100; (注意：不是 int i = 100; )
+实际上，执行上面那句代码的时候，系统为我们执行了：Integer i = Integer.valueOf(100); （反编译class文件可以看出）
+（反编译工具：http://download.csdn.net/detail/u011109881/9655780）
+此即基本数据类型的自动装箱功能。
+
+ 
+B 基本数据类型与对象的差别 
+基本数据类型不是对象，也就是使用int、double、boolean等定义的变量、常量。
+基本数据类型没有可调用的方法。
+eg：  int t = 1；     t.后面是没有方法滴。
+ Integer t =1； t.后面就有很多方法可让你调用了。
+
+ 
+C 什么时候自动装箱
+例如：Integer i = 100;
+相当于编译器自动为您作以下的语法编译：Integer i = Integer.valueOf(100);
+ 
+D 什么时候自动拆箱
+　自动拆箱(unboxing)，也就是将对象中的基本数据从对象中自动取出。如下可实现自动拆箱：
+1 Integer i = 10; //装箱 
+2  int t = i; //拆箱，实际上执行了 int t = i.intValue();
+　在进行运算时，也可以进行拆箱。 
+1 Integer i = 10; 
+2 System.out.println(i++);
+ 
+E Integer的自动装箱
+//在-128~127 之外的数
+ Integer i1 =200;  
+ Integer i2 =200;          
+ System.out.println("i1==i2: "+(i1==i2));                   
+ // 在-128~127 之内的数
+ Integer i3 =100;  
+ Integer i4 =100;  
+ Integer i6 = new Integer(100);
+ Integer i5 =Integer.valueOf(100);
+ System.out.println("i3==i4: "+(i3==i4));
+ System.out.println("i3==i5: "+(i3==i5));
+ System.out.println("i3==i6: "+(i3==i6));
+ 　　 输出的结果是：
+	i1==i2: false
+	i3==i4: true
+	i3==i5: true
+	i3==i6: false
+ 说明：
+equals() 比较的是两个对象的值（内容）是否相同。
+"==" 比较的是两个对象的引用（内存地址）是否相同，也用来比较两个基本数据类型的变量值是否相等。
+前面说过，int 的自动装箱，是系统执行了 Integer.valueOf(int i)，先看看Integer.java的源码：
+
+public static Integer valueOf(int i) {
+    if(i >= -128 && i <= IntegerCache.high)　　// 没有设置的话，IngegerCache.high 默认是127
+        return IntegerCache.cache[i + 128];
+    else
+        return new Integer(i);
+}　　
+
+对于–128到127（默认是127）之间的值，Integer.valueOf(int i) 返回的是缓存的Integer对象（并不是新建对象）
+所以范例中，i3 与 i4实际上是指向同一个对象。
+而其他值，执行Integer.valueOf(int i) 返回的是一个新建的 Integer对象，所以范例中，i1与i2 指向的是不同的对象。
+
+当然，当不使用自动装箱功能的时候，情况与普通类对象一样，请看下例：
+1 Integer i3 =new Integer(100); 
+2 Integer i4 =new Integer(100); 
+3 System.out.println("i3==i4: "+(i3==i4));//显示false
+
+F double和float的自动装箱
+
+		Double i1 = 100.0;
+		Double i2 = 100.0;
+		Float i3 = 200.0f;
+		Float i4 = 200.0f;
+
+		System.out.println(i1 == i2);
+		System.out.println(i3 == i4);
+运行结果：
+false
+false
+反编译：
+    Double i1 = Double.valueOf(100.0D);
+    Double i2 = Double.valueOf(100.0D);
+    Float i3 = Float.valueOf(200.0F);
+    Float i4 = Float.valueOf(200.0F);
+
+    System.out.println(i1 == i2);
+    System.out.println(i3 == i4);
+
+Double.valueOf以及Float valueOf的实现
+public static Double valueOf(double d) {
+	return new Double(d);
+}
+public static Float valueOf(float f) {
+	return new Float(f);
+}
+
+G Boolean的自动装箱
+ 		
+		Boolean i1 = false;//同样执行的是Boolean.valueOf(false)
+        Boolean i3 = true;
+        Boolean i4 = true;
+         
+        System.out.println(i1==i2);
+        System.out.println(i3==i4);
+执行结果
+true
+true
+
+源码：
+public static Boolean valueOf(boolean b) {
+        return (b ? TRUE : FALSE);
+    }
+
+而
+public static final Boolean TRUE = new Boolean(true);
+
+    /** 
+     * The <code>Boolean</code> object corresponding to the primitive 
+     * value <code>false</code>. 
+     */
+public static final Boolean FALSE = new Boolean(false);
+两个值都是static的，因此相等
+
+
+结论：
+Byte Short Integer Long Doule Float Charater在直接赋值时（没有使用xx.ValueOf或new XX(),而是直接== 具体值）会发生自动装箱，然后之后使用==直接比较两个包装过的值会比较地址。
+自动装箱池大小：Byte,Short,Long对应的是-128~127   Character对应的是0~127  Float和Double没有自动装箱池（来自各自类的valueOf的源码实现）
+自动装箱和拆箱的原因：Java使用自动装箱和拆箱机制，节省了常用数值的内存开销和创建对象的开销，提高了效率。
+1）Integer和 int之间可以进行各种比较；Integer对象将自动拆箱后与int值比较 
+2）两个Integer对象之间也可以用>、<等符号比较大小；两个Integer对象都拆箱后，再比较大小，但是，如果使用==比较，不会拆箱，而是比较对象的地址
+3）两个Integer对象最好不要用==比较。因为：-128~127范围(一般是这个范围)内是取缓存内对象用，所以相等，该范围外是两个不同对象引用比较，所以不等。
+

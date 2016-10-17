@@ -1,5 +1,8 @@
 Java变量分类详解
 
+本系列以 http://www.runoob.com/java/java-basic-syntax.html 为纲要，个人理解和整理，如有错误请指出，谢谢。
+（略过了java历史和环境配置）
+
 关键词：
 局部变量 类变量（静态变量） 实例变量
 

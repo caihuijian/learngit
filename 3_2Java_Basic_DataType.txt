@@ -1,5 +1,8 @@
 java基本数据类型
 
+本系列以 http://www.runoob.com/java/java-basic-syntax.html 为纲要，个人理解和整理，如有错误请指出，谢谢。
+（略过了java历史和环境配置）
+
 关键词：
 byte short int long float double char boolean
 基本数据类型之间的转换

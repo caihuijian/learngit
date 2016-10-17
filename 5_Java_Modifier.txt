@@ -1,7 +1,7 @@
 Java 修饰符
 
-关键词：
-
+本系列以 http://www.runoob.com/java/java-basic-syntax.html 为纲要，个人理解和整理，如有错误请指出，谢谢。
+（略过了java历史和环境配置）
 
 Java语言提供了很多修饰符，主要分为以下两类：
 访问修饰符
