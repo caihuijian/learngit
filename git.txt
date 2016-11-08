@@ -1,0 +1,450 @@
+git init
+git log
+git add [file name]    （修改存到缓存区 staged）
+git commit -m [comment]
+git status
+#git log --pretty=oneline
+git reflog           (记录每一次提交的commit id)
+git diff HEAD -- [file name]   (查看工作区对应文件和版本库里面最新版本的区别，HEAD可以换成HEAD^--上一次提交 或者换成commit id)
+
+--------------------------------------------------------------
+git checkout -- readme.txt  （意思就是，把readme.txt文件在工作区的修改全部撤销---指没有add之前的修改  意思是，把缓存区的readme.txt替换到本地，如果缓存区没有readme.txt，那么把本地readme.txt替换成上次commit的readme.txt 个人理解  --如果去掉，是切换分支的意思）
+git reset HEAD file （把暂存区的修改（add到stage的文件）撤销掉（unstage） git reset命令既可以回退版本，也可以把暂存区的修改回退到工作区。当我们用HEAD时，表示最新的版本 ）
+小结
+场景1：当你改乱了工作区某个文件的内容，想直接丢弃工作区的修改时，用命令git checkout -- file。
+
+场景2：当你不但改乱了工作区某个文件的内容，还添加到了暂存区时，想丢弃修改，分两步，第一步用命令git reset HEAD file，就回到了场景1，第二步按场景1操作。
+
+场景3：已经提交了不合适的修改到版本库时，想要撤销本次提交，参考版本回退一节，不过前提是没有推送到远程库。
+-----------------------------------------------------------------
+
+删除文件
+git rm [file name]
+git commit -m "comment" (或者git checkout -- [file name] 撤销删除)
+-------------------------------------------------------------------
+远程仓库
+
+第1步：创建SSH key
+打开终端 $ ssh-keygen -t rsa -C "youremail@example.com"
+一路回车
+如果一切顺利的话，可以在用户主目录里找到.ssh目录，里面有id_rsa和id_rsa.pub两个文件，这两个就是SSH Key的秘钥对，id_rsa是私钥，不能泄露出去，id_rsa.pub是公钥，可以放心地告诉任何人
+第2步：本地与GitHub绑定
+登陆GitHub，打开“Account settings”，“SSH Keys”页面。之后参见github官网，官网更新步骤可能不一致。
+
+------------------------------------------------------------------
+添加远程库
+
+git remote add origin git@github.com:michaelliao/learngit.git
+千万注意，把上面的michaelliao替换成你自己的GitHub账户名，否则，你在本地关联的就是我的远程库，关联没有问题，但是你以后推送是推不上去的，因为你的SSH Key公钥不在我的账户列表中
+git push -u origin master（把本地库的所有内容推送到远程库上，把本地库的内容推送到远程，用git push命令，实际上是把当前分支master推送到远程。由于远程库是空的，我们第一次推送master分支时，加上了-u参数，Git不但会把本地的master分支内容推送的远程新的master分支，还会把本地的master分支和远程的master分支关联起来，在以后的推送或者拉取时就可以简化命令）
+git push origin master（把本地master分支的最新修改推送至GitHub，现在，你就拥有了真正的分布式版本库）
+
+-------------------------------------------------------------------
+从远程库克隆
+
+1.在github创建一个新仓库，勾选Initialize this repository with a README
+2.使用clone命令克隆一个本地库
+git clone git@github.com:michaelliao/gitskills.git（注意把Git库的地址换成你自己的，然后进入本地库目录看看，已经有README.md文件了）
+3.进到本地库看看，多了些什么
+
+-------------------------------------------------------------------
+创建与合并分支
+
+查看分支：git branch
+
+创建分支：git branch <name>
+
+切换分支：git checkout <name>
+
+创建+切换分支：git checkout -b <name>
+
+合并某分支到当前分支：git merge <name>
+
+删除分支：git branch -d <name>
+
+---------------------------------------------------------------------
+解决冲突（练习）
+
+caihuijian- pc@caihuijian-PC MINGW64 /f/gittest/gitskills (master)
+$ git checkout -b featrue1
+Switched to a new branch 'featrue1'
+
+caihuijian- pc@caihuijian-PC MINGW64 /f/gittest/gitskills (featrue1)
+$ vi README.md
+
+caihuijian- pc@caihuijian-PC MINGW64 /f/gittest/gitskills (featrue1)
+$ git add README.md
+
+caihuijian- pc@caihuijian-PC MINGW64 /f/gittest/gitskills (featrue1)
+$ git commit -m "add in feature1"
+[featrue1 ef952d2] add in feature1
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+caihuijian- pc@caihuijian-PC MINGW64 /f/gittest/gitskills (featrue1)
+$ git checkout master
+Switched to branch 'master'
+Your branch is ahead of 'origin/master' by 1 commit.
+  (use "git push" to publish your local commits)
+
+caihuijian- pc@caihuijian-PC MINGW64 /f/gittest/gitskills (master)
+$ vi README.md
+
+caihuijian- pc@caihuijian-PC MINGW64 /f/gittest/gitskills (master)
+$ git add README.md
+
+caihuijian- pc@caihuijian-PC MINGW64 /f/gittest/gitskills (master)
+$ git commit -m "add in master"
+[master 404990a] add in master
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+caihuijian- pc@caihuijian-PC MINGW64 /f/gittest/gitskills (master)
+$ git merge featrue1
+Auto-merging README.md
+CONFLICT (content): Merge conflict in README.md
+Automatic merge failed; fix conflicts and then commit the result.
+
+caihuijian- pc@caihuijian-PC MINGW64 /f/gittest/gitskills (master|MERGING)
+$ git status
+On branch master
+Your branch is ahead of 'origin/master' by 2 commits.
+  (use "git push" to publish your local commits)
+You have unmerged paths.
+  (fix conflicts and run "git commit")
+  (use "git merge --abort" to abort the merge)
+
+Unmerged paths:
+  (use "git add <file>..." to mark resolution)
+
+        both modified:   README.md
+
+no changes added to commit (use "git add" and/or "git commit -a")
+
+caihuijian- pc@caihuijian-PC MINGW64 /f/gittest/gitskills (master|MERGING)
+$ vi README.md
+
+caihuijian- pc@caihuijian-PC MINGW64 /f/gittest/gitskills (master|MERGING)
+$ git add README.md
+
+caihuijian- pc@caihuijian-PC MINGW64 /f/gittest/gitskills (master|MERGING)
+$ git commit -m "fix conflict"
+[master 373c9d8] fix conflict
+
+caihuijian- pc@caihuijian-PC MINGW64 /f/gittest/gitskills (master)
+$ git log --graph --pretty=oneline --abbrev-commit
+*   373c9d8 fix conflict
+|\
+| * ef952d2 add in feature1
+* | 404990a add in master
+|/
+* ad941f4 commit in dev branch
+* cef84d8 Initial commit
+
+caihuijian- pc@caihuijian-PC MINGW64 /f/gittest/gitskills (master)
+$ git branch -d featrue1
+Deleted branch featrue1 (was ef952d2).
+
+用git log --graph命令可以看到分支合并图。
+
+------------------------------------------------------------------------
+分支管理策略（可对比创建与合并分支一节的Fast-forward合并模式，助理解，合并分支时，加上--no-ff参数就可以用普通模式合并，合并后的历史有分支，能看出来曾经做过合并，而fast forward合并就看不出来曾经做过合并。）
+练习
+caihuijian- pc@caihuijian-PC MINGW64 /f/gittest/gitskills (master)
+$ git checkout -b dev
+Switched to a new branch 'dev'
+
+caihuijian- pc@caihuijian-PC MINGW64 /f/gittest/gitskills (dev)
+$ vi README.md
+
+caihuijian- pc@caihuijian-PC MINGW64 /f/gittest/gitskills (dev)
+$ git add README.md
+
+caihuijian- pc@caihuijian-PC MINGW64 /f/gittest/gitskills (dev)
+$ git commit -m "add merge"
+[dev 0ce2a6a] add merge
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+caihuijian- pc@caihuijian-PC MINGW64 /f/gittest/gitskills (dev)
+$ git checkout master
+Switched to branch 'master'
+Your branch is ahead of 'origin/master' by 4 commits.
+  (use "git push" to publish your local commits)
+
+caihuijian- pc@caihuijian-PC MINGW64 /f/gittest/gitskills (master)
+$ git merge --no-ff -m "marge with no-ff" dev
+Merge made by the 'recursive' strategy.
+ README.md | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+caihuijian- pc@caihuijian-PC MINGW64 /f/gittest/gitskills (master)
+$ git log --graph --pretty=oneline --abbrev-commit
+*   ff5b48b marge with no-ff
+|\
+| * 0ce2a6a add merge
+|/
+*   373c9d8 fix conflict
+|\
+| * ef952d2 add in feature1
+* | 404990a add in master
+|/
+* ad941f4 commit in dev branch
+* cef84d8 Initial commit
+
+caihuijian- pc@caihuijian-PC MINGW64 /f/gittest/gitskills (master)
+$ git branch
+  dev
+* master
+
+||||||||
+以下是fast-forward的合并，注意最后的合并节点
+caihuijian- pc@caihuijian-PC MINGW64 /f/learngit (master)
+$ git branch
+* master
+
+caihuijian- pc@caihuijian-PC MINGW64 /f/learngit (master)
+$ git checkout -b dev
+Switched to a new branch 'dev'
+
+caihuijian- pc@caihuijian-PC MINGW64 /f/learngit (dev)
+$ vi 11.txt
+
+caihuijian- pc@caihuijian-PC MINGW64 /f/learngit (dev)
+$ git add 11.txt
+warning: LF will be replaced by CRLF in 11.txt.
+The file will have its original line endings in your working directory.
+
+caihuijian- pc@caihuijian-PC MINGW64 /f/learngit (dev)
+$ git commit -m "commit in dev branch"
+[dev 989d4cd] commit in dev branch
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+caihuijian- pc@caihuijian-PC MINGW64 /f/learngit (dev)
+$ git checkout master
+Switched to branch 'master'
+Your branch is up-to-date with 'origin/master'.
+
+caihuijian- pc@caihuijian-PC MINGW64 /f/learngit (master)
+$ git merge dev
+Updating 1754dd0..989d4cd
+Fast-forward
+ 11.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+caihuijian- pc@caihuijian-PC MINGW64 /f/learngit (master)
+$ git branch
+  dev
+* master
+
+caihuijian- pc@caihuijian-PC MINGW64 /f/learngit (master)
+$ git log --graph --pretty=oneline --abbrev-commit
+* 989d4cd commit in dev branch
+* 1754dd0 test
+* 11c93b8 test
+------------------------------------------------------------
+Bug分支（git status，切bug分支等 涉及git stash pop和git stash apply [stashid]）
+
+练习
+  git branch
+* dev
+  master
+
+caihuijian- pc@caihuijian-PC MINGW64 /f/learngit (dev)
+$ git status
+On branch dev
+Changes to be committed:
+  (use "git reset HEAD <file>..." to unstage)
+
+        new file:   hello.py
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git checkout -- <file>..." to discard changes in working directory)
+
+        modified:   readme.txt
+
+
+caihuijian- pc@caihuijian-PC MINGW64 /f/learngit (dev)
+$ git stash
+warning: LF will be replaced by CRLF in readme.txt.
+The file will have its original line endings in your working directory.
+Saved working directory and index state WIP on dev: 989d4cd commit in dev branch
+HEAD is now at 989d4cd commit in dev branch
+
+caihuijian- pc@caihuijian-PC MINGW64 /f/learngit (dev)
+$ git checkout master
+Switched to branch 'master'
+Your branch is ahead of 'origin/master' by 1 commit.
+  (use "git push" to publish your local commits)
+
+caihuijian- pc@caihuijian-PC MINGW64 /f/learngit (master)
+$ ls
+11.txt  readme.txt
+
+caihuijian- pc@caihuijian-PC MINGW64 /f/learngit (master)
+$ git checkout -b issue-101
+Switched to a new branch 'issue-101'
+
+caihuijian- pc@caihuijian-PC MINGW64 /f/learngit (issue-101)
+$ vi readme.txt
+
+caihuijian- pc@caihuijian-PC MINGW64 /f/learngit (issue-101)
+$ git add readme.txt
+warning: LF will be replaced by CRLF in readme.txt.
+The file will have its original line endings in your working directory.
+
+caihuijian- pc@caihuijian-PC MINGW64 /f/learngit (issue-101)
+$ git commit -m "fix 101 bug"
+[issue-101 2115560] fix 101 bug
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+caihuijian- pc@caihuijian-PC MINGW64 /f/learngit (issue-101)
+$ git checkout master
+Switched to branch 'master'
+Your branch is ahead of 'origin/master' by 1 commit.
+  (use "git push" to publish your local commits)
+
+caihuijian- pc@caihuijian-PC MINGW64 /f/learngit (master)
+$ git merge --no-ff -m "merge bug 101" issue-101
+Merge made by the 'recursive' strategy.
+ readme.txt | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+caihuijian- pc@caihuijian-PC MINGW64 /f/learngit (master)
+$ git branch -d issue-101
+Deleted branch issue-101 (was 2115560).
+
+caihuijian- pc@caihuijian-PC MINGW64 /f/learngit (master)
+$ git checkout dev
+Switched to branch 'dev'
+
+caihuijian- pc@caihuijian-PC MINGW64 /f/learngit (dev)
+$ git status
+On branch dev
+nothing to commit, working tree clean
+
+caihuijian- pc@caihuijian-PC MINGW64 /f/learngit (dev)
+$ git stash list
+stash@{0}: WIP on dev: 989d4cd commit in dev branch
+
+caihuijian- pc@caihuijian-PC MINGW64 /f/learngit (dev)
+$ git stash pop
+On branch dev
+Changes to be committed:
+  (use "git reset HEAD <file>..." to unstage)
+
+        new file:   hello.py
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git checkout -- <file>..." to discard changes in working directory)
+
+        modified:   readme.txt
+
+Dropped refs/stash@{0} (b1b61861f155c555f4e81a62b9a00d0eed897459)
+
+caihuijian- pc@caihuijian-PC MINGW64 /f/learngit (dev)
+$ ls
+11.txt  hello.py  readme.txt
+
+caihuijian- pc@caihuijian-PC MINGW64 /f/learngit (dev)
+$ git stash list
+
+caihuijian- pc@caihuijian-PC MINGW64 /f/learngit (dev)
+$
+
+caihuijian- pc@caihuijian-PC MINGW64 /f/learngit (dev)
+$ git stash
+Saved working directory and index state WIP on dev: 989d4cd commit in dev branch
+HEAD is now at 989d4cd commit in dev branch
+
+caihuijian- pc@caihuijian-PC MINGW64 /f/learngit (dev)
+$ git status
+On branch dev
+nothing to commit, working tree clean
+
+caihuijian- pc@caihuijian-PC MINGW64 /f/learngit (dev)
+$ git stash list
+stash@{0}: WIP on dev: 989d4cd commit in dev branch
+
+caihuijian- pc@caihuijian-PC MINGW64 /f/learngit (dev)
+$ git stash apply stash@{0}
+On branch dev
+Changes to be committed:
+  (use "git reset HEAD <file>..." to unstage)
+
+        new file:   hello.py
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git checkout -- <file>..." to discard changes in working directory)
+
+        modified:   readme.txt
+
+
+caihuijian- pc@caihuijian-PC MINGW64 /f/learngit (dev)
+$ git stash list
+stash@{0}: WIP on dev: 989d4cd commit in dev branch
+
+---------------------------------------------------------
+Feature分支（与bug分支非常类似）
+
+  git branch
+* dev
+  master
+
+caihuijian- pc@caihuijian-PC MINGW64 /f/learngit (dev)
+$ git checkout -b feature-add
+A       hello.py
+M       readme.txt
+Switched to a new branch 'feature-add'
+
+caihuijian- pc@caihuijian-PC MINGW64 /f/learngit (feature-add)
+$ vi add.py
+
+caihuijian- pc@caihuijian-PC MINGW64 /f/learngit (feature-add)
+$ git add add.py
+warning: LF will be replaced by CRLF in add.py.
+The file will have its original line endings in your working directory.
+
+caihuijian- pc@caihuijian-PC MINGW64 /f/learngit (feature-add)
+$ git commit -m "add feature add"
+[feature-add c050982] add feature add
+ 2 files changed, 1 insertion(+)
+ create mode 100644 add.py
+ create mode 100644 hello.py
+
+caihuijian- pc@caihuijian-PC MINGW64 /f/learngit (feature-add)
+$ git checkout dev
+M       readme.txt
+Switched to branch 'dev'
+
+caihuijian- pc@caihuijian-PC MINGW64 /f/learngit (dev)
+$ git branch -d feature-add
+error: The branch 'feature-add' is not fully merged.
+If you are sure you want to delete it, run 'git branch -D feature-add'.
+
+caihuijian- pc@caihuijian-PC MINGW64 /f/learngit (dev)
+$ git branch -D feature-add
+Deleted branch feature-add (was c050982).
+
+(最终啥也没干)
+
+---------------------------------------------------------
+多人协作
+
+查看远程库信息，使用git remote -v；
+
+本地新建的分支如果不推送到远程，对其他人就是不可见的；
+
+从本地推送分支，使用git push origin branch-name，如果推送失败，先用git pull抓取远程的新提交；
+
+在本地创建和远程分支对应的分支，使用git checkout -b branch-name origin/branch-name，本地和远程分支的名称最好一致；
+
+建立本地分支和远程分支的关联，使用git branch --set-upstream branch-name origin/branch-name；
+
+从远程抓取分支，使用git pull，如果有冲突，要先处理冲突。
+
+-----------------------------------------------------------
+
+
+----------------------------------------------------------
+
